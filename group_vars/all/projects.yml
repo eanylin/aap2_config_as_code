@@ -1,0 +1,12 @@
+---
+controller_projects:
+  - name: config_as_code
+    organization: config_as_code
+    description: execution environments configurations
+    credential: git
+    scm_branch: master
+    scm_clean: 'yes'
+    scm_type: git
+    scm_update_on_launch: 'yes'
+    scm_url: https://gitlab.1abcd.example.opentlc.com/student1/workshop_project.git
+...

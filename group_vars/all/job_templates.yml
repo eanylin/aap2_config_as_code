@@ -1,0 +1,30 @@
+---
+controller_templates:
+  - name: build_execution_environments
+    job_type: run
+    inventory: config_as_code
+    execution_environment: supported
+    project: config_as_code
+    playbook: 'playbooks/build_ee.yml'
+    credentials:
+      - root
+      - ad_admin_user_pass
+  - name: ah_config
+    job_type: run
+    inventory: config_as_code
+    execution_environment: supported
+    project: config_as_code
+    playbook: 'playbooks/hub_config.yml'
+    credentials:
+      - ah_token_user
+  - name: controller_config
+    job_type: run
+    inventory: config_as_code
+    execution_environment: supported
+    project: config_as_code
+    playbook: 'playbooks/controller_config.yml'
+    credentials:
+      - aap_admin
+      - ah_token_user
+      - vault
+...

@@ -1,0 +1,15 @@
+---
+controller_execution_environments:
+  - name: "supported"
+    image: "hub-student1.1abcd.example.opentlc.com/ee-supported-rhel8"
+    pull: "always"
+    credential: "cr_ah"
+  - name: "minimal"
+    image: "hub-student1.1abcd.example.opentlc.com/ee-minimal-rhel8"
+    pull: "always"
+    credential: "cr_ah"
+  - name: "old_29_22"
+    image: "hub-student1.1abcd.example.opentlc.com/ee-29-rhel8"
+    pull: "always"
+    credential: "cr_ah"
+...
