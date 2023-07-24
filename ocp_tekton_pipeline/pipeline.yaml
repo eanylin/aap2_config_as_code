@@ -1,0 +1,83 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: aap-config-as-code
+spec:
+  description: | 
+    This pipeline demonstrates AAP Config as Code
+  params:
+  - name: repo-url
+    type: string
+    description: The git repo URL to clone from.
+  tasks:
+  - name: fetch-source
+    taskRef:
+      name: git-clone
+    workspaces:
+    - name: output
+      workspace: shared-data
+    params:
+    - name: url
+      value: $(params.repo-url)
+  - name: print-readme
+    runAfter: ["fetch-source"]
+    taskRef:
+      name: print-readme
+    workspaces:
+    - name: source
+      workspace: shared-data
+  - name: build-new-custom-ee-image-publish-to-automation-hub
+    params:
+    - name: HOST
+      value: "student1.1abcd.example.opentlc.com"
+    - name: USERNAME
+      value: "student"
+    - name: SSH_SCRIPT
+      value: |
+        #!/bin/sh
+        cd /home/student/windows-workshop/workshop_project && ansible-playbook -i inventory.yml -l builder playbooks/build_ee.yml -v
+    runAfter: ["print-readme"]
+    taskRef:
+      name: remote-ssh-commands
+    workspaces:
+    - name: credentials
+      workspace: credentials
+  - name: configure-ansible-automation-hub-after-installation
+    params:
+    - name: HOST
+      value: "student1.1abcd.example.opentlc.com"
+    - name: USERNAME
+      value: "student"
+    - name: SSH_SCRIPT
+      value: |
+        #!/bin/sh
+        cd /home/student/windows-workshop/workshop_project && ansible-navigator run playbooks/hub_config.yml --eei hub-student1.1abcd.example.opentlc.com/config_as_code -i inventory.yml -l automationcontroller --pa='--tls-verify=false' -m stdout -v
+    runAfter: ["build-new-custom-ee-image-publish-to-automation-hub"]
+    taskRef:
+      name: remote-ssh-commands
+    workspaces:
+    - name: credentials
+      workspace: credentials
+  - name: configure-ansible-automation-controller-after-installation
+    params:
+    - name: HOST
+      value: "student1.1abcd.example.opentlc.com"
+    - name: USERNAME
+      value: "student"
+    - name: SSH_SCRIPT
+      value: |
+        #!/bin/sh
+        cd /home/student/windows-workshop/workshop_project && ansible-navigator run playbooks/controller_config.yml --eei hub-student1.1abcd.example.opentlc.com/config_as_code -i inventory.yml -l automationcontroller --pa='--tls-verify=false' -m stdout -v
+    runAfter: ["configure-ansible-automation-hub-after-installation"]
+    taskRef:
+      name: remote-ssh-commands
+    workspaces:
+    - name: credentials
+      workspace: credentials
+  workspaces:
+  - name: shared-data
+    description: |
+      This workspace contains the files, so they can be read by the next task.
+  - name: credentials
+    description: |
+      Ansible Automation Controller and Hub SSH Credentials

@@ -1,0 +1,24 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: aap-config-as-code-run-
+spec:
+  pipelineRef:
+    name: aap-config-as-code
+  podTemplate:
+    securityContext: {}
+  workspaces:
+  - name: shared-data
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+  - name: credentials
+    secret:
+      secretName: remote-ssh-secret
+  params:
+  - name: repo-url
+    value: https://github.com/eanylin/aap2_config_as_code.git
